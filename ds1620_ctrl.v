@@ -28,13 +28,13 @@ parameter                         READ_CONFIG_REG               = 8'hAC;
 parameter                         START_CONVERT_REG             = 8'hEE;
 parameter                         STOP_CONVERT_REG              = 8'h22;
 parameter                         WRITE_CONFIG_REG              = 8'h0C;
-parameter                         CONTINUE_MOD_REG              = 8'h00;
+parameter                         CONTINUE_MOD_REG              = 8'b0000_0010;
 parameter                         WRITE_TH_REG                  = 8'h01;
 parameter                         WRITE_TL_REG                  = 8'h02;
-parameter                         TH_REG                        = 9'b010110100; //SET 90 DEGREES
-parameter                         TL_REG                        = 9'b010101010; //SET 85 DEGREES
+parameter                         TH_REG                        = {8'd90, 1'b0}; //SET 90 DEGREES{8'd90, 1'b0} 9'b010110100
+parameter                         TL_REG                        = {8'd85, 1'b0};  //SET 85 DEGREES{8'd90, 1'b0} 9'b010101010
 parameter                         TEST_WORD                     = 9'h0FA;
-parameter                         CONFIG_REG                    = 9'b000001000;//reg after initialization h008
+parameter                         CONFIG_REG                    = 8'b00001010;//reg after initialization h008
 
 //PARAMETERS FOR CLOCK DEVIDER 1 MHZ
 //parameter WIDTH = 5; // 
@@ -592,9 +592,12 @@ always  @ (posedge CLK_32, posedge RESET) begin
  //END INITIALIZATION DS1620. FULL TIME OF INITIALIZATION ~ 31 MS
  
  always @ (posedge CLK_32) begin //scan config_reg, if CONFIG_REG_I==CONFIG_REG, start initialization saccessuly passed
-	if (CONFIG_REG_I == CONFIG_REG && END_START_INIT==1'b1 && DS1620_BUSY_STROBE) begin//DS1620_BUSY_STROBE
+	if (((CONFIG_REG_I[0] == CONFIG_REG [0]) || (CONFIG_REG_I[1] == CONFIG_REG [1]) 
+	    || (CONFIG_REG_I[7] == CONFIG_REG [7]) || (CONFIG_REG_I[4] == CONFIG_REG [4])) 
+	    && END_START_INIT==1'b1 && DS1620_BUSY_STROBE) begin//DS1620_BUSY_STROBE
 		START_INIT_DONE     <= 1'b1; 
-	end else if (CONFIG_REG_I !== CONFIG_REG || END_START_INIT==1'b0) begin
+	end else if (((CONFIG_REG_I[0] !== CONFIG_REG [0]) || (CONFIG_REG_I[1] !== CONFIG_REG [1]) 
+	    || (CONFIG_REG_I[7] !== CONFIG_REG [7]) || (CONFIG_REG_I[4] !== CONFIG_REG [4])) || END_START_INIT==1'b0) begin
 		START_INIT_DONE     <= 1'b0;
 	end
  end
@@ -729,13 +732,14 @@ always @  (posedge CLK_32) begin
 		//DQ_TEMP <= 16'b0;
 		RELOAD_INIT<=1'b0;
     end else if (RESET ==1'b1) begin
+    DQ_TEMP <= 16'b0;  
 		READ_DATA_TEMP_SUCCESSFUL <=1'b0;
 		RELOAD_INIT<=1'b0;
-	end else if (We_slave_i_lbus_reg==1 && ack_access_reg_1==1'b1 && Adr_slave_i_lbus_reg[15:13]==DS1620_SET && DS1620_BUSY==1'b1) begin//START RELOAD INITIALIZATION DS1620, IF DS1620 IS BUSY, COMMAND IGNORED
-	//end else if (We_slave_i_lbus_reg==0 && ack_access_reg_1==1'b1 && Adr_slave_i_lbus_reg[11:8]==4'b1111 && DS1620_BUSY==1'b1) begin
+	//end else if (We_slave_i_lbus_reg==1 && ack_access_reg_1==1'b1 && Adr_slave_i_lbus_reg[15:13]==DS1620_SET && DS1620_BUSY==1'b1) begin//START RELOAD INITIALIZATION DS1620, IF DS1620 IS BUSY, COMMAND IGNORED
+	end else if (We_slave_i_lbus_reg==0 && ack_access_reg_1==1'b1 && Adr_slave_i_lbus_reg[11:8]==4'b1111 && DS1620_BUSY==1'b1) begin
 		READ_DATA_TEMP_SUCCESSFUL <=1'b1;
-	end else if (We_slave_i_lbus_reg==1 && ack_access_reg_1==1'b1 && Adr_slave_i_lbus_reg[15:13]==DS1620_SET && DS1620_BUSY==1'b0) begin//IF BUSY = 0, STARTS DS1620 INITIALIZATION
-	//end else if (We_slave_i_lbus_reg==0 && ack_access_reg_1==1'b1 && Adr_slave_i_lbus_reg[11:8]==4'b1111 && DS1620_BUSY==1'b0) begin
+	//end else if (We_slave_i_lbus_reg==1 && ack_access_reg_1==1'b1 && Adr_slave_i_lbus_reg[15:13]==DS1620_SET && DS1620_BUSY==1'b0) begin//IF BUSY = 0, STARTS DS1620 INITIALIZATION
+	end else if (We_slave_i_lbus_reg==0 && ack_access_reg_1==1'b1 && Adr_slave_i_lbus_reg[11:8]==4'b1111 && DS1620_BUSY==1'b0) begin
 		READ_DATA_TEMP_SUCCESSFUL <=1'b1;
 		RELOAD_INIT<=1'b1;
    end else if (read_data_temp_done_strobe == 1'b1 && ~(We_slave_i_lbus_reg==0 && ack_access_reg_1==1'b1 && Adr_slave_i_lbus_reg[15:13]==DS1620_SET)) begin
