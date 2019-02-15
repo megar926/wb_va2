@@ -161,13 +161,13 @@ trig_filt trig_filt_we_wb       (.clk(CLK_32), .sig_in(We_slave_i_lbus_),  .sig_
 trig_filt trig_filt_sel_wb      (.clk(CLK_32), .sig_in(Sel_slave_i_lbus_), .sig_out(Sel_slave_i_lbus));
 trig_filt trig_filt_cyc_wb      (.clk(CLK_32), .sig_in(Cyc_slave_i_lbus_), .sig_out(Cyc_slave_i_lbus));
 
-assign RESET = (!RESET_MKO)?1'b1:1'b0;
+//assign RESET = (!RESET_MKO)?1'b1:1'b0;//for test
 //assign RESET = (!RESET_UVV)?1'b1:1'b0;
-//assign RESET = !RESET_MKO|| !RESET_UVV|| !RESET_UVV_T;//
-//assign ack_access = (Stb_slave_i_lbus ==1 && Sel_slave_i_lbus ==1); //&& Cyc_slave_i_lbus==1 //used in last gvm
+assign RESET = !RESET_MKO|| !RESET_UVV|| !RESET_UVV_T;//used in last gvm 001
+assign ack_access = (Stb_slave_i_lbus ==1 && Sel_slave_i_lbus ==1); //&& Cyc_slave_i_lbus==1 //used in last gvm 001
 
 //assign ack_access = (Stb_slave_i_lbus ==1 || Cyc_slave_i_lbus==1 || Sel_slave_i_lbus ==1);
-assign ack_access = (Stb_slave_i_lbus ==1'b1)?1'b1:1'b0;
+//assign ack_access = (Stb_slave_i_lbus ==1'b1)?1'b1:1'b0;//for test
 
 always @ (posedge CLK_32) begin
 if (RESET)
