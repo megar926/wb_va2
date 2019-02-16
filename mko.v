@@ -211,8 +211,12 @@ always @ (posedge CLK_32) begin
 		MKO_RDWR_N<=1'b1;
 end
 
-//For test
+//For testbench
 $monitor(“Reset register - %b%b%b%b%b/n”, mko_res_0, mko_res_1, mko_res_2, mko_res_3, mko_res_4);
 $monitor(“MKO RDAT0 register -  %b%b%b%b%b/n”, MKO_RDAT4 [0], MKO_RDAT3 [0], MKO_RDAT2 [0], MKO_RDAT1 [0], MKO_RDAT0 [0]);
+$monitor(“MKO RDAT1 register -  %b%b%b%b%b/n”, MKO_RDAT4 [1], MKO_RDAT3 [1], MKO_RDAT2 [1], MKO_RDAT1 [1], MKO_RDAT0 [1]);
+$monitor(“MKO RDAT2 register -  %b%b%b%b%b/n”, MKO_RDAT4 [2], MKO_RDAT3 [2], MKO_RDAT2 [2], MKO_RDAT1 [2], MKO_RDAT0 [2]);
+$monitor(“MKO RDAT3 register -  %b%b%b%b%b/n”, MKO_RDAT4 [3], MKO_RDAT3 [3], MKO_RDAT2 [3], MKO_RDAT1 [3], MKO_RDAT0 [3]);
+$monitor(“MKO RDAT4 register -  %b%b%b%b%b/n”, MKO_RDAT4 [4], MKO_RDAT3 [4], MKO_RDAT2 [4], MKO_RDAT1 [4], MKO_RDAT0 [4]);
 
 endmodule
